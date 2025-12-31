@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import Calm from "./pages/Calm";
+import Weather from "./pages/Weather";
+import BottomNav from "./components/BottomNav";
 
 const globalStyles = `
   @keyframes slideUp {
@@ -20,10 +24,16 @@ export default function App() {
     <>
       <style>{globalStyles}</style>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
+        <>
+          <Routes>
+            <Route path="/" element={<Onboarding />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/weather" element={<Weather />} />
+            <Route path="/calm" element={<Calm />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+          <BottomNav />
+        </>
       </BrowserRouter>
     </>
   );

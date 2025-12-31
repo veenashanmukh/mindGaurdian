@@ -4,6 +4,7 @@ import MoodWeather from "../components/MoodWeather";
 import { storeDay, getPattern } from "../ai/dayMemory";
 import { getStreak } from "../utils/streak";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import DailyReflection from "./DailyReflection";
 
@@ -14,8 +15,11 @@ import BreathingGame from "../components/games/BreathingGame";
 import FocusBooster from "../components/games/FocusBooster";
 import { getCoins } from "../utils/rewards";
 import { getLevel } from "../utils/levels";
+import { simulateStressWeek } from "../utils/demoMode";
+import VoiceCheck from "../components/VoiceCheck";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   
   const mood = localStorage.getItem("userMood");
   const isTired = mood === "Tired";
@@ -31,6 +35,7 @@ export default function Dashboard() {
   const [showGame, setShowGame] = useState(false);
   const [showFocus, setShowFocus] = useState(false);
   const [showGarden, setShowGarden] = useState(false);
+  const [showVoice, setShowVoice] = useState(false);
 const [showNight, setShowNight] = useState(false);
 const [showReflection, setShowReflection] = useState(false);
 
@@ -50,6 +55,16 @@ const [showReflection, setShowReflection] = useState(false);
       <div style={streakBox}>
         🌱 {streak} day calm streak
       </div>
+
+      <button
+        style={{marginBottom:10, padding: "10px 16px", borderRadius: 12, background: "#5DB075", color: "#fff", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500}}
+        onClick={()=>{
+          simulateStressWeek();
+          window.location.reload();
+        }}
+      >
+        🎥 Demo Stress Week
+      </button>
 
       <div
         style={styles.card}
@@ -102,6 +117,14 @@ const [showReflection, setShowReflection] = useState(false);
             </div>
           )}
 
+          <div style={styles.box} onClick={() => setShowVoice(true)}>
+            Voice Check-in 🎤
+          </div>
+
+          <div style={styles.box} onClick={() => navigate("/profile")}>
+            My Growth 🌱
+          </div>
+
         </div>
 
         <MoodWeather />
@@ -116,6 +139,7 @@ const [showReflection, setShowReflection] = useState(false);
       {showGame && <BreathingGame onClose={() => setShowGame(false)} />}
       {showFocus && <FocusBooster onClose={() => setShowFocus(false)} />}
       {showGarden && <GratitudeGarden onClose={() => setShowGarden(false)} />}
+      {showVoice && <VoiceCheck onClose={() => setShowVoice(false)} />}
       {showNight && <NightReflection onClose={() => setShowNight(false)} />}
         {showReflection && <DailyReflection onClose={()=>setShowReflection(false)} />}
 
