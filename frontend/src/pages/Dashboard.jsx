@@ -51,7 +51,11 @@ const [showReflection, setShowReflection] = useState(false);
         🌱 {streak} day calm streak
       </div>
 
-      <div style={styles.card}>
+      <div
+        style={styles.card}
+        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
+        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+      >
         <p style={styles.score}>Daily Wellness Score</p>
         <h2 style={styles.big}>{mood === "Stressed" ? "58" : "78"} / 100</h2>
         <p style={styles.tag}>{mood} day expected</p>
@@ -115,6 +119,7 @@ const [showReflection, setShowReflection] = useState(false);
       {showNight && <NightReflection onClose={() => setShowNight(false)} />}
         {showReflection && <DailyReflection onClose={()=>setShowReflection(false)} />}
 
+      <div style={fab} onClick={() => setShowGame(true)}>＋</div>
     </div>
   );
 }
@@ -123,7 +128,8 @@ const styles = {
   wrapper: {
     minHeight: "100vh",
     padding: 24,
-    background: "linear-gradient(to bottom, #101615, #1c1f1e)",
+    background: "radial-gradient(circle at top, #1f2d2b, #0c0f0e)",
+    backdropFilter: "blur(14px)",
     color: "#fff",
     fontFamily: "system-ui",
   },
@@ -141,6 +147,8 @@ const styles = {
     color: "#111",
     maxWidth: 420,
     boxShadow: "0 20px 40px rgba(0,0,0,.35)",
+    border: "1px solid rgba(255,255,255,.08)",
+    transition: "all .3s ease",
   },
 
   score: {
@@ -202,4 +210,21 @@ const streakBox = {
   display: "inline-block",
   fontSize: 13,
   color: "#9fffc9"
+};
+
+const fab = {
+  position: "fixed",
+  bottom: 24,
+  right: 24,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+  background: "#5DB075",
+  color: "#fff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 34,
+  boxShadow: "0 10px 30px rgba(93,176,117,.6)",
+  cursor: "pointer"
 };
