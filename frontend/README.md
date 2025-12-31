@@ -1,16 +1,117 @@
-# React + Vite
+🧠 MindGuardian – Proactive Mental Wellness Companion (Prototype)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MindGuardian is a permission-light mental wellness app designed to identify early signs of stress and provide gentle, low-effort support without requiring emotional labeling, journaling, or constant self-reporting.
 
-Currently, two official plugins are available:
+This repository contains the Round 2 MVP prototype built for the GDG Open Innovation Hackathon.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🚀 What This Prototype Demonstrates
 
-## React Compiler
+Situational, behavior-based personalization (not emotion labels)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+A complete user flow: onboarding → check-in → dashboard
 
-## Expanding the ESLint configuration
+Adaptive support suggestions based on user energy and patterns
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Privacy-first design with optional enhancements
+
+Clean architecture suitable for future scaling
+
+This is a functional prototype, not a production system.
+
+🧩 Core Features Implemented (MVP Scope)
+
+Onboarding Flow – collects basic user info (name, age)
+
+Situational Check-ins – users respond to everyday scenarios
+
+Adaptive Dashboard – shows a daily balance score and suggestions
+
+Calming Intervention – one working breathing-based activity
+
+Permission-Light Design – app works without voice, wearables, or tracking
+
+(Some advanced features are mocked or represented conceptually.)
+
+🏗️ Tech Stack Used
+Frontend
+
+React (UI framework)
+
+Vite (fast development & bundling)
+
+React Router (navigation)
+
+Google / Cloud Tools (Planned & Partially Integrated)
+
+Firebase (Authentication, Firestore – planned for next iteration)
+
+Architecture supports future integration with Google ML Kit
+
+📁 Project Structure (Simplified)
+frontend/
+ 
+    └── src/
+     
+     ├── pages/        # App screens (Onboarding, Dashboard, etc.)
+     
+     ├── components/   # Reusable UI & features
+     
+     ├── logic/        # Prototype inference & personalization logic
+     
+     ├── assets/       # Icons, sounds
+     
+     └── services/     # Firebase & app services
+
+▶️ How to Run the Project Locally
+Prerequisites
+
+Node.js (LTS)
+
+Git
+
+VS Code (recommended)
+
+Steps
+git clone <repo-url>
+cd mindGuardian/frontend
+npm install
+npm run dev
+
+
+Open in browser:
+
+http://localhost:5173/
+
+⚠️ Note
+
+This is an MVP prototype, not a full app
+
+Logic is rule-based for demonstration
+
+No datasets or ML training are included at this stage
+
+Focus is on flow, UX, and concept clarity
+
+🌱 Future Scope (Not Required for Round 2)
+
+Mobile-native build
+
+Firebase Authentication & Analytics
+
+On-device ML (stress inference)
+
+Wearable integration
+
+Advanced personalization
+
+👥 Team Collaboration
+
+All dependencies are managed via npm
+
+Do NOT commit node_modules
+
+Keep commits small and descriptive
+
+📌 One-line Summary
+
+MindGuardian quietly learns from user behavior and provides timely support—without forcing emotional disclosure.
