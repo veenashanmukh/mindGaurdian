@@ -17,6 +17,7 @@ import { getCoins } from "../utils/rewards";
 import { getLevel } from "../utils/levels";
 import { simulateStressWeek } from "../utils/demoMode";
 import VoiceCheck from "../components/VoiceCheck";
+import CalmSound from "../components/CalmSound";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -25,6 +26,9 @@ export default function Dashboard() {
   const isTired = mood === "Tired";
   const isStressed = mood === "Stressed";
   const pattern = getPattern();
+  const isBurnout = pattern === "STRESS_PATTERN";
+  const score = isBurnout ? 52 : mood === "Stressed" ? 58 : 78;
+  const tagText = isBurnout ? "Burnout risk detected" : `${mood} day expected`;
   const streak = getStreak();
   const coins = getCoins();
   const level = getLevel(coins);
@@ -41,6 +45,7 @@ const [showReflection, setShowReflection] = useState(false);
 
   return (
     <div style={styles.wrapper}>
+      <CalmSound mood={mood} />
       <h1 style={styles.title}>
   Good Morning 👋 <span style={{ color: "#5DB075" }}>
     {localStorage.getItem("userName") || "Friend"}
@@ -72,14 +77,26 @@ const [showReflection, setShowReflection] = useState(false);
         onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
       >
         <p style={styles.score}>Daily Wellness Score</p>
-        <h2 style={styles.big}>{mood === "Stressed" ? "58" : "78"} / 100</h2>
-        <p style={styles.tag}>{mood} day expected</p>
+        <h2 style={styles.big}>{score} / 100</h2>
+        <p style={styles.tag}>{tagText}</p>
       </div>
 
-      {pattern === "STRESS_PATTERN" && (
+      {isBurnout && (
         <div style={burnoutBox}>
           ⚠️ Your recent days look heavy.  
           Tomorrow should be kept gentle.
+        </div>
+      )}
+
+      {isBurnout && (
+        <div style={{
+          background:"#402222",
+          color:"#ffbdbd",
+          padding:14,
+          borderRadius:14,
+          marginTop:16
+        }}>
+          ⚠️ Burnout Shield Activated — we'll keep your days lighter
         </div>
       )}
 
