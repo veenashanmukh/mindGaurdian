@@ -4,7 +4,7 @@ export default function MoodWeather() {
   const icons = {
     Calm: "☀️",
     Okay: "⛅",
-    Tired: "🌫️",
+    Tired: "�️",
     Stressed: "🌧️"
   };
 

@@ -22,7 +22,8 @@ export default function DailyReflection({ onClose }) {
 const styles = {
   overlay:{
     position:"fixed", inset:0, background:"rgba(0,0,0,.7)",
-    display:"flex", justifyContent:"center", alignItems:"center"
+    display:"flex", justifyContent:"center", alignItems:"center",
+    animation: "slideUp .4s ease"
   },
   card:{
     background:"#fff", padding:28, borderRadius:24,

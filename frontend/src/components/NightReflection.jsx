@@ -38,6 +38,7 @@ const overlay = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  animation: "slideUp .4s ease",
 };
 
 const card = {
