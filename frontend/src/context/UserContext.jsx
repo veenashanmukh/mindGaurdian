@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 export const UserContext = createContext();
 
@@ -7,8 +7,18 @@ export function UserProvider({ children }) {
     name: "",
     age: "",
     situations: [],
-    energyLevel: "normal",
-    mode: "baseline"
+    energy: "normal", // low | normal | high
+    permissions: {
+      notifications: false,
+      screenTime: false,
+      voice: false,
+      wearable: false,
+    },
+    screenTimeData: {
+      totalForegroundMs: 0,
+      lastStart: null,
+    },
+    journals: [],
   });
 
   return (
@@ -16,4 +26,8 @@ export function UserProvider({ children }) {
       {children}
     </UserContext.Provider>
   );
+}
+
+export function useUser() {
+  return useContext(UserContext);
 }

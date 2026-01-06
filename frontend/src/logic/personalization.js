@@ -1,19 +1,23 @@
-/**
- * Returns suggestions based on user situations.
- * Designed to stay minimal and non-overwhelming.
- */
-export function personalizeSuggestions(situations = []) {
-  if (!situations || situations.length === 0) {
-    return ["breathing"];
+export function personalizeSuggestions(energy) {
+  if (energy === "low") {
+    return [
+      "2-minute breathing exercise",
+      "Gentle music",
+      "Do nothing for 5 minutes",
+    ];
   }
 
-  if (situations.includes("overwhelmed") || situations.includes("exhausted")) {
-    return ["breathing"];
+  if (energy === "high") {
+    return [
+      "Focus session",
+      "Protect your momentum",
+      "Avoid distractions",
+    ];
   }
 
-  if (situations.includes("focused")) {
-    return ["pause", "calm-audio"];
-  }
-
-  return ["pause"];
+  return [
+    "Short walk",
+    "Light reflection",
+    "Calming game",
+  ];
 }

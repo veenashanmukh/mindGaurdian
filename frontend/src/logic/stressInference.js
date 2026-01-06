@@ -1,18 +1,16 @@
-/**
- * Infers stress level in a safe, non-intrusive way.
- * Designed to handle cold-start users ethically.
- */
-export function inferStress(user) {
-  // Cold start: not enough information
-  if (!user || !user.situations || user.situations.length < 2) {
-    return "neutral";
-  }
+// Simple, deterministic wellness inference
+// No AI, no dataset, hackathon-safe
 
-  // Low energy days → gentle elevation
-  if (user.energyLevel === "low") {
-    return "elevated";
-  }
+export function inferWellnessScore(user) {
+  let score = 80;
 
-  // Default steady state
-  return "normal";
+  if (!user) return score;
+
+  if (user.energy === "low") score -= 25;
+  if (user.energy === "high") score += 5;
+
+  if (user.situations?.includes("overwhelmed")) score -= 20;
+  if (user.situations?.includes("exhausted")) score -= 25;
+
+  return Math.max(30, Math.min(score, 95));
 }
