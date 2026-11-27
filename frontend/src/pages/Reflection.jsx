@@ -1,43 +1,50 @@
 import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { analyzeTextTone, extractStressKeywords } from "../services/mlkitService";
 
 export default function Reflection() {
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const [text, setText] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [hint, setHint] = useState("");
 
-  const autoSummary = () => {
-    // Use local heuristic MLKit abstraction to infer tone and keywords
-    const parts = [];
-    if (user.situations && user.situations.length) {
-      parts.push(`You reflected on: ${user.situations.join(", ")}`);
-    }
-
-    const toneRes = analyzeTextTone(text || "");
+  function readTone() {
+    const tone = analyzeTextTone(text || "");
     const kws = extractStressKeywords(text || "");
+    const toneWords = { calm: "calm and settled", tense: "a bit tense", neutral: "fairly even" };
+    let msg = `Your words read as ${toneWords[tone.tone] || tone.tone}.`;
+    if (kws?.length) msg += ` You mentioned ${kws.slice(0, 3).join(", ")}; it might help to name one small thing you can do about it tomorrow.`;
+    setHint(msg);
+  }
 
-    parts.push(`Energy: ${user.energy || "normal"}`);
-    parts.push(`Tone: ${toneRes.tone} (score ${Math.round(toneRes.score * 100)}%)`);
-    if (kws && kws.length) parts.push(`Keywords: ${kws.join(", ")}`);
-
-    return parts.join(" — ");
-  };
+  function save() {
+    const entry = { date: new Date().toLocaleDateString(), text: text.trim(), energy: user.energy };
+    setUser((p) => ({ ...p, reflections: [...(p.reflections || []), entry] }));
+    setSaved(true);
+  }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <h2>End-of-day Reflection (optional)</h2>
+    <div className="mg-page">
+      <header className="mg-page__head">
+        <h1>End of the day</h1>
+        <p className="mg-muted">What do you want to put down before you sleep? A sentence is enough.</p>
+      </header>
 
       <textarea
+        className="mg-textarea mg-textarea--tall"
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Write something (or use auto-summary)"
-        style={{ width: "100%", minHeight: "160px", padding: "0.75rem" }}
+        onChange={(e) => { setText(e.target.value); setSaved(false); setHint(""); }}
+        placeholder="Today I…"
+        aria-label="Reflection"
       />
 
-      <div style={{ marginTop: "1rem" }}>
-        <button onClick={() => alert("Saved locally — no data shared.")}>Save</button>
-        <button style={{ marginLeft: "0.75rem" }} onClick={() => setText(autoSummary())}>Auto Summary</button>
+      <div className="mg-row">
+        <button className="mg-btn" onClick={save} disabled={!text.trim() || saved}>{saved ? "Saved" : "Save reflection"}</button>
+        <button className="mg-btn mg-btn--ghost" onClick={readTone} disabled={!text.trim()}>How does it sound?</button>
+        {saved && <Link to="/dashboard">Back to Home</Link>}
       </div>
+      {hint && <p className="mg-card mg-summary" aria-live="polite">{hint}</p>}
     </div>
   );
 }

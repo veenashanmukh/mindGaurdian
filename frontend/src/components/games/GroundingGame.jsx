@@ -25,18 +25,22 @@ export default function GroundingGame() {
 
   const currentStep = steps[step];
 
-  const handleAddItem = (e) => {
-    if (e.key === "Enter" && e.target.value.trim()) {
-      const key = `step_${step}`;
-      const items = responses[key] || [];
-      if (items.length < currentStep.count) {
-        setResponses({ ...responses, [key]: [...items, e.target.value.trim()] });
-        e.target.value = "";
-      }
+  const [draft, setDraft] = useState("");
+
+  const addItem = (e) => {
+    e.preventDefault();
+    const value = draft.trim();
+    if (!value) return;
+    const key = `step_${step}`;
+    const items = responses[key] || [];
+    if (items.length < currentStep.count) {
+      setResponses({ ...responses, [key]: [...items, value] });
+      setDraft("");
     }
   };
 
   const handleNext = () => {
+    setDraft("");
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
@@ -69,32 +73,28 @@ export default function GroundingGame() {
       <h2>{currentStep.sense}</h2>
       <p style={{ color: "#6b7280" }}>{currentStep.prompt}</p>
 
-      <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+      <form onSubmit={addItem} className="mg-inline-form">
         <input
           type="text"
-          placeholder={`Add item (${currentItems.length}/${currentStep.count})`}
-          onKeyPress={handleAddItem}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={`Type one thing (${currentItems.length}/${currentStep.count})`}
           disabled={currentItems.length >= currentStep.count}
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: 8,
-            border: "1px solid #d1d5db",
-            fontSize: 14,
-          }}
+          aria-label={currentStep.prompt}
         />
-      </div>
+        <button type="submit" className="mg-btn mg-btn--soft" disabled={currentItems.length >= currentStep.count || !draft.trim()}>Add</button>
+      </form>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "1.5rem" }}>
         {currentItems.map((item, i) => (
           <div
             key={i}
             style={{
-              background: "#f0fdf4",
+              background: "#D9EAE6",
               padding: "8px 12px",
               borderRadius: 20,
               fontSize: 13,
-              color: "#10b981",
+              color: "#22504E",
             }}
           >
             ✓ {item}

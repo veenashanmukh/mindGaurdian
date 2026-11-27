@@ -1,109 +1,93 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
-import Card from "../components/common/Card";
-import WellnessScore from "../components/dashboard/WellnessScore";
 import Suggestions from "../components/dashboard/Suggestions";
-import MoodSummary from "../components/dashboard/MoodSummary";
-import { inferWellnessScore } from "../logic/stressInference";
 import { personalizeSuggestions } from "../logic/personalization";
-import { getUpcomingEvents, getEventEmoji, formatEventTime } from "../services/calendarService";
 import { generatePersonalizedForecast } from "../logic/forecastInference";
 
+const ENERGY = [
+  { value: "low", label: "Low", line: "Go easy today. Small things count." },
+  { value: "normal", label: "Steady", line: "A steady day. Keep a little room to breathe." },
+  { value: "high", label: "Wired", line: "Lots of energy. Point it somewhere useful, then rest." },
+];
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return "Still up";
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 export default function Dashboard() {
-  const { user } = useContext(UserContext);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [emotionalForecast, setEmotionalForecast] = useState([]);
+  const { user, setUser } = useContext(UserContext);
+  const energy = ENERGY.find((e) => e.value === user.energy) || ENERGY[1];
+  const suggestions = personalizeSuggestions(user.energy);
+  const forecast = useMemo(() => generatePersonalizedForecast(user), [user]);
+  const today = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date().getDay()];
+  const lastReflection = (user.reflections || []).slice(-1)[0];
 
-  const score = inferWellnessScore(user);
-  const suggestions = personalizeSuggestions(user?.energy || 50);
-
-  useEffect(() => {
-    // Generate personalized forecast based on user data
-    setEmotionalForecast(generatePersonalizedForecast(user));
-
-    (async () => {
-      try {
-        const result = await getUpcomingEvents(3);
-        if (result?.ok) {
-          setUpcomingEvents(result.events.map((e) => ({ id: e.id, title: e.title, time: formatEventTime(e.start), emoji: getEventEmoji(e.title) })));
-        }
-      } catch (e) {
-        // ignore, keep empty
-      }
-    })();
-  }, [user]);
-
-  const reflections = (user?.situations || []).slice(-3).map((s, i) => ({ id: i, title: s, body: '' }));
-
-  const smallStats = [
-    { label: 'Session balance', value: 78 },
-    { label: 'Sleep', value: '7.2h' },
-  ];
+  function checkIn(value) {
+    setUser((p) => ({
+      ...p,
+      energy: value,
+      checkIns: [...(p.checkIns || []), { kind: "energy", value, date: new Date().toISOString() }],
+    }));
+  }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: 1200, margin: '0 auto' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 18 }}>
-        <div>
-          <Card style={{ padding: 20 }}>
-            <h3 style={{ marginTop: 0 }}>📊 7-Day Emotional Forecast</h3>
-            <div style={{ display: 'flex', gap: 12 }}>
-              {(emotionalForecast.length > 0 ? emotionalForecast : []).map((d) => (
-                <div key={d.day} style={{ flex: 1, textAlign: 'center', padding: 12, borderRadius: 12, background: d.highlight ? '#fff7fe' : '#f8fafc' }}>
-                  <div style={{ fontSize: 28 }}>{d.emoji}</div>
-                  <div style={{ fontSize: 12, fontWeight: 700 }}>{d.day}</div>
-                  <div style={{ fontSize: 11, opacity: 0.9 }}>{d.label}</div>
-                </div>
-              ))}
-            </div>
-          </Card>
+    <div className="mg-page mg-page--wide">
+      <header className="mg-hello">
+        <h1>{greeting()}{user.name ? `, ${user.name}` : ""}.</h1>
+        <p className="mg-hello__line">{energy.line}</p>
+      </header>
 
-          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-            {smallStats.map((s, i) => (
-              <div key={i} style={{ background: '#f8fafc', padding: 14, borderRadius: 12, flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 700 }}>{s.value}</div>
-                <div style={{ color: '#6b7280', fontSize: 13 }}>{s.label}</div>
-              </div>
+      <div className="mg-dash">
+        <section className="mg-card mg-dash__energy" aria-labelledby="checkin-title">
+          <h2 id="checkin-title" className="mg-card__title">How's your energy?</h2>
+          <div className="mg-chips" role="group" aria-labelledby="checkin-title">
+            {ENERGY.map((e) => (
+              <button key={e.value} className={`mg-chip${user.energy === e.value ? " is-on" : ""}`} aria-pressed={user.energy === e.value} onClick={() => checkIn(e.value)}>
+                {e.label}
+              </button>
             ))}
           </div>
+          <p className="mg-muted" style={{ marginBottom: 0 }}>
+            {(user.checkIns || []).length} check-ins so far. <Link to="/check">Take the 5-question check</Link>
+          </p>
+        </section>
 
-          <div style={{ marginTop: 12 }}>
-            <Card>
-              <h3 style={{ marginTop: 0 }}>Today’s gentle suggestions</h3>
-              <Suggestions items={suggestions} />
-            </Card>
-          </div>
-        </div>
+        <section className="mg-card mg-dash__suggest" aria-labelledby="sugg-title">
+          <h2 id="sugg-title" className="mg-card__title">Try one of these</h2>
+          <Suggestions items={suggestions} />
+        </section>
 
-        <div>
-          <Card style={{ padding: 16 }}>
-            <h3 style={{ marginTop: 0 }}>📅 Your Schedule</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {upcomingEvents.length ? upcomingEvents.map((evt) => (
-                <div key={evt.id} style={{ background: 'rgba(0,0,0,0.03)', borderRadius: 10, padding: 10, display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <div style={{ fontSize: 20 }}>{evt.emoji}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{evt.title}</div>
-                    <div style={{ fontSize: 12, opacity: 0.9 }}>{evt.time}</div>
-                  </div>
-                </div>
-              )) : <div style={{ color: '#9ca3af' }}>No upcoming events</div>}
-            </div>
-          </Card>
+        <section className="mg-card mg-dash__week" aria-labelledby="week-title">
+          <h2 id="week-title" className="mg-card__title">Your week, as it might feel</h2>
+          <p className="mg-muted">Based on your check-ins and journal. It gets more personal the more you use it.</p>
+          <ol className="mg-week">
+            {forecast.map((d) => (
+              <li key={d.day} className={d.day === today ? "is-today" : ""}>
+                <span className="mg-week__emoji" aria-hidden="true">{d.emoji}</span>
+                <span className="mg-week__day">{d.day}</span>
+                <span className="mg-week__label">{d.label}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-          <div style={{ marginTop: 12 }}>
-            <Card>
-              <h3 style={{ marginTop: 0 }}>Reflections</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {reflections.length ? reflections.map((r) => (
-                  <div key={r.id} style={{ background: '#f8fafc', padding: 12, borderRadius: 12 }}>
-                    <div style={{ fontWeight: 700 }}>{r.title}</div>
-                    <div style={{ color: '#6b7280', fontSize: 14 }}>{r.body}</div>
-                  </div>
-                )) : <div style={{ color: '#9ca3af' }}>No reflections yet — add one after your day.</div>}
-              </div>
-            </Card>
-          </div>
-        </div>
+        <section className="mg-card mg-dash__refl" aria-labelledby="refl-title">
+          <h2 id="refl-title" className="mg-card__title">Last reflection</h2>
+          {lastReflection ? (
+            <>
+              <p className="mg-entry__text">{lastReflection.text}</p>
+              <p className="mg-muted" style={{ marginBottom: 0 }}>{lastReflection.date}</p>
+            </>
+          ) : (
+            <p className="mg-muted">Nothing yet. A sentence before bed helps close the day.</p>
+          )}
+          <Link to="/reflection">Write tonight's reflection</Link>
+        </section>
       </div>
     </div>
   );

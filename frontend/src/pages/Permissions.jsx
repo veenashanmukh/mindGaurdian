@@ -1,106 +1,65 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { sendTestNotification } from "../services/notificationService";
 
 const STEPS = [
-  'notifications',
-  'screenTime',
-  'voice',
-  'wearable',
+  { key: "notifications", title: "Gentle reminders", detail: "A quiet nudge to check in once a day. You can turn it off any time." },
+  { key: "voice", title: "Voice check-ins", detail: "Lets you speak instead of type. Only the tone of your voice is analysed, on this device." },
+  { key: "screenTime", title: "Screen time", detail: "Counts how long you spend in MindGuardian, to notice late-night use. Nothing leaves your device." },
 ];
 
 export default function Permissions() {
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const [index, setIndex] = useState(0);
+  const [note, setNote] = useState("");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // ensure user object exists
-    if (!user) return;
-  }, [user]);
-
-  async function requestNotification() {
-    try {
-      if (!('Notification' in window)) {
-        alert('Notifications not supported in this browser');
-        setUser((p) => ({ ...p, permissions: { ...p.permissions, notifications: false } }));
-        return;
-      }
-
-      const result = await Notification.requestPermission();
-      const allowed = result === 'granted';
-      setUser((p) => ({ ...p, permissions: { ...p.permissions, notifications: allowed } }));
-      if (allowed) sendTestNotification('MindGuardian enabled notifications', { body: 'This is a test notification.' });
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function requestScreenTime() {
-    // no browser permission; ask for consent and start tracking
-    const ok = confirm('Allow MindGuardian to track app foreground time to enable screen-time aware suggestions?');
-    setUser((p) => ({ ...p, permissions: { ...p.permissions, screenTime: ok }, screenTimeData: { ...p.screenTimeData, lastStart: ok ? Date.now() : null } }));
-  }
-
-  async function requestVoice() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // immediately stop; this is a permission test
-      stream.getTracks().forEach((t) => t.stop());
-      setUser((p) => ({ ...p, permissions: { ...p.permissions, voice: true } }));
-    } catch (err) {
-      setUser((p) => ({ ...p, permissions: { ...p.permissions, voice: false } }));
-    }
-  }
-
-  function requestWearable() {
-    const ok = confirm('MindGuardian can integrate with wearables in advanced mode (structure only). Allow simulated wearable data?');
-    setUser((p) => ({ ...p, permissions: { ...p.permissions, wearable: ok } }));
-  }
-
-  async function handleAction() {
-    const step = STEPS[index];
-    if (step === 'notifications') await requestNotification();
-    if (step === 'screenTime') requestScreenTime();
-    if (step === 'voice') await requestVoice();
-    if (step === 'wearable') requestWearable();
-
-    if (index + 1 < STEPS.length) setIndex(index + 1);
-    else navigate('/check');
-  }
-
   const step = STEPS[index];
 
-  const titleMap = {
-    notifications: 'Notifications',
-    screenTime: 'Screen time',
-    voice: 'Voice (microphone)',
-    wearable: 'Wearables (optional)',
+  const next = () => {
+    setNote("");
+    if (index + 1 < STEPS.length) setIndex(index + 1);
+    else navigate("/check");
   };
 
-  const descMap = {
-    notifications: 'Enable notifications to receive gentle reminders from MindGuardian.',
-    screenTime: 'Allow tracking app foreground time to improve personalization (no data leaves your device).',
-    voice: 'Optional: allow microphone for voice check-ins and voice-based activities.',
-    wearable: 'Optional: allow integration with wearable devices (structure only in this build).',
-  };
+  const set = (key, value, extra = {}) => setUser((p) => ({ ...p, ...extra, permissions: { ...p.permissions, [key]: value } }));
+
+  async function allow() {
+    if (step.key === "notifications") {
+      if (!("Notification" in window)) { setNote("This browser doesn't support notifications, so we'll skip this."); set("notifications", false); setTimeout(next, 1500); return; }
+      const res = await Notification.requestPermission();
+      set("notifications", res === "granted");
+      if (res === "granted") sendTestNotification("Reminders are on", { body: "MindGuardian will check in gently." });
+    }
+    if (step.key === "voice") {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((t) => t.stop());
+        set("voice", true);
+      } catch {
+        set("voice", false);
+      }
+    }
+    if (step.key === "screenTime") {
+      set("screenTime", true, { screenTimeData: { totalForegroundMs: 0, lastStart: Date.now() } });
+    }
+    next();
+  }
 
   return (
-    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ maxWidth: 720, width: '100%' }}>
-        <div style={{ background: 'white', padding: 20, borderRadius: 12, boxShadow: '0 10px 30px rgba(2,6,23,0.06)' }}>
-          <h2>{titleMap[step]}</h2>
-          <p style={{ color: '#6b7280' }}>{descMap[step]}</p>
-
-          <div style={{ marginTop: 12 }}>
-            <button onClick={handleAction}>Allow / Continue</button>
-            <button style={{ marginLeft: 8 }} onClick={() => { if (index + 1 < STEPS.length) setIndex(index + 1); else navigate('/check'); }}>Skip</button>
-          </div>
-
-          <div style={{ marginTop: 12, color: '#94a3b8' }}>You can change these later in Profile.</div>
-        </div>
+    <main className="mg-page mg-permissions">
+      <div className="mg-progress" aria-hidden="true">
+        <div className="mg-progress__fill" style={{ width: `${((index + 1) / STEPS.length) * 100}%` }} />
       </div>
-    </div>
+      <p className="mg-muted">Step {index + 1} of {STEPS.length}. All optional.</p>
+      <h1>{step.title}</h1>
+      <p className="mg-lede">{step.detail}</p>
+      <div className="mg-row">
+        <button className="mg-btn" onClick={allow}>Allow</button>
+        <button className="mg-btn mg-btn--ghost" onClick={next}>Not now</button>
+      </div>
+      {note && <p className="mg-muted" role="status">{note}</p>}
+      <p className="mg-muted">You can change these later in Profile.</p>
+    </main>
   );
 }

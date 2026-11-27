@@ -57,7 +57,7 @@ const QUESTIONS = [
 
 export default function SituationalCheck() {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const [index, setIndex] = useState(0);
 
   const question = QUESTIONS[index];
@@ -67,67 +67,44 @@ export default function SituationalCheck() {
 
     setUser((prev) => ({
       ...prev,
-      situations: [...(prev.situations || []), option.label],
+      situations: [...(prev.situations || []), option.label].slice(-30),
       energy,
+      checkIns: index + 1 === QUESTIONS.length
+        ? [...(prev.checkIns || []), { kind: "quiz", value: energy, date: new Date().toISOString() }]
+        : prev.checkIns || [],
     }));
 
     if (index + 1 < QUESTIONS.length) {
       setIndex(index + 1);
     } else {
-      try { const { trackSituationalCheckCompleted } = await import('../services/analyticsService'); trackSituationalCheckCompleted(); } catch (e) {}
+      try { const { trackSituationalCheckCompleted } = await import('../services/analyticsService'); trackSituationalCheckCompleted(); } catch { /* analytics optional */ }
       navigate("/dashboard");
     }
   }
 
-  const buttonStyle = {
-    textAlign: 'left',
-    padding: '18px 20px',
-    borderRadius: 12,
-    background: '#f8fafc',
-    border: '1px solid #eef2ff',
-    fontSize: 16,
-    color: '#1f2937',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  };
-
   return (
-    <div style={{ padding: "2rem", display: "flex", justifyContent: "center" }}>
-      <div style={{ maxWidth: 760, width: "100%" }}>
-        <div style={{ background: "white", borderRadius: 16, padding: "1.5rem 2rem", boxShadow: "0 10px 30px rgba(2,6,23,0.06)" }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ color: '#6b7280' }}>Question {index + 1} of {QUESTIONS.length}</div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {QUESTIONS.map((q, i) => (
-                <div key={q.id} style={{ width: 8, height: 8, borderRadius: 8, background: i === index ? '#7c3aed' : '#e6e6e9' }} />
-              ))}
-            </div>
-          </div>
+    <div className="mg-page">
+      <div className="mg-quiz">
+        <div className="mg-quiz__top">
+          {index > 0 ? (
+            <button className="mg-btn mg-btn--ghost" onClick={() => setIndex(index - 1)}>← Back</button>
+          ) : (
+            <span className="mg-muted">No right or wrong answers</span>
+          )}
+          <span className="mg-muted">{index + 1} of {QUESTIONS.length}</span>
+        </div>
+        <div className="mg-progress" aria-hidden="true">
+          <div className="mg-progress__fill" style={{ width: `${(index / QUESTIONS.length) * 100}%` }} />
+        </div>
 
-          <h2 style={{ marginTop: 12 }}>{question.text}</h2>
+        <h1 className="mg-quiz__q">{question.text}</h1>
 
-          <div style={{ marginTop: 18, display: 'grid', gap: 12 }}>
-            {question.options.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => selectOption(opt)}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#eef2ff';
-                  e.target.style.borderColor = '#7c3aed';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = '#f8fafc';
-                  e.target.style.borderColor = '#eef2ff';
-                }}
-                style={buttonStyle}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 12, color: '#94a3b8' }}>No right or wrong answers</div>
+        <div className="mg-options">
+          {question.options.map((opt) => (
+            <button key={opt.value} className="mg-option" onClick={() => selectOption(opt)}>
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>

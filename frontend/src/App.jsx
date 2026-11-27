@@ -17,11 +17,11 @@ import FirebaseDebug from "./pages/FirebaseDebug";
 function AppContent() {
   const location = useLocation();
   // Hide navbar on auth, onboarding, and permissions pages
-  const hideNavBarRoutes = ["/", "/permissions", "/auth"];
+  const hideNavBarRoutes = ["/", "/permissions", "/auth", "/check"];
   const showNavBar = !hideNavBarRoutes.includes(location.pathname);
 
   return (
-    <div className="app-container" style={{ paddingBottom: 90 }}>
+    <div className="app-container">
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={<Onboarding />} />

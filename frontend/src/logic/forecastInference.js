@@ -22,7 +22,12 @@ export function generatePersonalizedForecast(user) {
   if (!user) return DEFAULT_FORECAST;
 
   // Analyze recent audio tones
-  const recentTones = (user.audios || []).slice(-14).map((a) => a.tone || 'neutral');
+  // Voice check-ins and energy check-ins both feed the forecast
+  const energyTone = { low: 'reflective', normal: 'neutral', high: 'positive' };
+  const recentTones = [
+    ...(user.audios || []).map((a) => a.tone || 'neutral'),
+    ...(user.checkIns || []).map((c) => (c.kind === 'voice' ? c.value : energyTone[c.value] || 'neutral')),
+  ].slice(-14);
   const toneFreq = {};
   recentTones.forEach((t) => {
     toneFreq[t] = (toneFreq[t] || 0) + 1;
@@ -30,8 +35,8 @@ export function generatePersonalizedForecast(user) {
   const dominantTone = Object.keys(toneFreq).sort((a, b) => toneFreq[b] - toneFreq[a])[0] || 'neutral';
 
   // Analyze journal moods (simple keyword detection)
-  const journalMoods = (user.journals || []).slice(-10).map((j) => {
-    const content = (j.summary || j.content || '').toLowerCase();
+  const journalMoods = [...(user.journals || []), ...(user.reflections || [])].slice(-10).map((j) => {
+    const content = (j.summary || j.content || j.text || '').toLowerCase();
     if (/\b(happy|joy|excited|great|wonderful|good)\b/.test(content)) return 'positive';
     if (/\b(stressed|anxious|worried|tense|difficult)\b/.test(content)) return 'tense';
     if (/\b(calm|peaceful|relaxed|content)\b/.test(content)) return 'calm';

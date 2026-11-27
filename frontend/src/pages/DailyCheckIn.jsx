@@ -4,27 +4,25 @@ import { UserContext } from "../context/UserContext";
 
 export default function DailyCheckIn() {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
   const quickPick = (energy) => {
-    setUser((prev) => ({ ...prev, energy }));
+    setUser((prev) => ({ ...prev, energy, checkIns: [...(prev.checkIns || []), { kind: "energy", value: energy, date: new Date().toISOString() }] }));
     navigate("/dashboard");
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
-      <h2>Daily Check-in (quick)</h2>
-      <p>Pick what feels closest to your energy right now.</p>
-
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-        <button onClick={() => quickPick("low")}>Low energy</button>
-        <button onClick={() => quickPick("normal")}>Normal</button>
-        <button onClick={() => quickPick("high")}>High</button>
+    <div className="mg-page">
+      <header className="mg-page__head">
+        <h1>Quick check-in</h1>
+        <p className="mg-muted">Which is closest to your energy right now?</p>
+      </header>
+      <div className="mg-options">
+        <button className="mg-option" onClick={() => quickPick("low")}>Low: running on empty</button>
+        <button className="mg-option" onClick={() => quickPick("normal")}>Steady: getting through it</button>
+        <button className="mg-option" onClick={() => quickPick("high")}>Wired: lots of energy, maybe restless</button>
       </div>
-
-      <p style={{ marginTop: "1.5rem", color: "#666" }}>
-        This is optional — the app adapts gently based on your choice.
-      </p>
+      <p className="mg-muted">Home adjusts its suggestions to your answer.</p>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export default function Loader() {
           width: "40px",
           height: "40px",
           border: "3px solid #eee",
-          borderTop: "3px solid #6366f1",
+          borderTop: "3px solid #2F6B68",
           borderRadius: "50%",
           animation: "spin 1s linear infinite",
         }}
