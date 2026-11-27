@@ -11,6 +11,7 @@ No account needed. Everything you enter stays on your own device.
 ## What you can do
 
 - **Check in with yourself.** Tap Low, Steady or Wired, or take the 5-question check. Home adjusts its suggestions to how you're doing.
+- **A calm space.** A seated Buddha on a lotus greets you, with a halo that slowly breathes in and out, and rests softly behind every page.
 - **Calm down in a minute or two.** Box breathing with a breathing orb, a quiet timer with a soft chime, 5-4-3-2-1 grounding, progressive muscle relaxation, mindful colouring and calm tapping.
 - **Voice check-in.** Speak for a few seconds; MindGuardian reads the tone of your voice (not the words) on your device and suggests what might help.
 - **Background sounds.** Rain, ocean waves, a forest morning and soft piano, generated live in the browser, with volume and a stop-after timer.

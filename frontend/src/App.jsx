@@ -22,6 +22,7 @@ function AppContent() {
 
   return (
     <div className="app-container">
+      {showNavBar && <div className="mg-backdrop" aria-hidden="true" />}
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={<Onboarding />} />

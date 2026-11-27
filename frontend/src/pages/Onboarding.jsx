@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { trackOnboardingComplete } from "../services/analyticsService";
+import BuddhaFigure from "../components/BuddhaFigure";
 
 // The orb breathes on a 10-second cycle; the cue below it follows along.
 function BreathCue() {
@@ -33,7 +34,10 @@ export default function Onboarding() {
 
   return (
     <main className="mg-welcome">
-      <div className="mg-welcome__orb" aria-hidden="true" />
+      <div className="mg-welcome__stage" aria-hidden="true">
+        <div className="mg-welcome__orb" />
+        <BuddhaFigure className="mg-welcome__buddha" />
+      </div>
       <BreathCue />
 
       <div className="mg-welcome__body">
